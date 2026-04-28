@@ -32,7 +32,7 @@ Expected SELECT output:
 Run it:
 
 ```bash
-./gradlew test --tests io.mat.it.SqlTemporalJoinCdcE2EIT --rerun-tasks
+./gradlew test --tests dev.henneberger.it.SqlTemporalJoinCdcE2EIT --rerun-tasks
 ```
 
 `01_cdc_temporal_join_select.sql` contains the SQL shape used by the test.

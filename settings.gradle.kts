@@ -1,1 +1,1 @@
-rootProject.name = "mat"
+rootProject.name = "iceberg-cdc"

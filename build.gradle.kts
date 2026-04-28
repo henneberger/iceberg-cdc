@@ -1,10 +1,13 @@
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
+
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.vanniktech.maven.publish") version "0.36.0"
 }
 
-group = "io.mat"
-version = "0.1.0"
+group = "dev.henneberger"
+version = providers.gradleProperty("releaseVersion").orElse("0.1.0-SNAPSHOT").get()
 
 repositories {
     mavenCentral()
@@ -13,6 +16,40 @@ repositories {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+mavenPublishing {
+    coordinates("dev.henneberger", "iceberg-cdc", version.toString())
+    publishToMavenCentral(true)
+    signAllPublications()
+
+    pom {
+        name.set("iceberg-cdc")
+        description.set("Apache Flink source connector that exposes Apache Iceberg tables as CDC streams.")
+        url.set("https://github.com/henneberger/iceberg-cdc")
+
+        licenses {
+            license {
+                name.set("Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("repo")
+            }
+        }
+
+        developers {
+            developer {
+                id.set("henneberger")
+                name.set("Daniel Henneberger")
+                url.set("https://github.com/henneberger")
+            }
+        }
+
+        scm {
+            connection.set("scm:git:https://github.com/henneberger/iceberg-cdc.git")
+            developerConnection.set("scm:git:ssh://git@github.com/henneberger/iceberg-cdc.git")
+            url.set("https://github.com/henneberger/iceberg-cdc")
+        }
     }
 }
 
@@ -93,6 +130,10 @@ tasks.test {
             "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED",
             "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED")
     systemProperty("mat.state.backend", "hashmap")
+}
+
+tasks.withType<Javadoc>().configureEach {
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
 }
 
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {

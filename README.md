@@ -5,6 +5,8 @@
 ![Apache Flink 2.0.0](https://img.shields.io/badge/Apache%20Flink-2.0.0-E6526F?logo=apacheflink&logoColor=white)
 ![Apache Iceberg 1.10.1](https://img.shields.io/badge/Apache%20Iceberg-1.10.1-2E8BFF)
 ![Gradle](https://img.shields.io/badge/build-Gradle-02303A?logo=gradle&logoColor=white)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.henneberger/iceberg-cdc.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/dev.henneberger/iceberg-cdc)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 `iceberg-cdc` is an Apache Flink source connector that exposes Apache Iceberg tables as
 CDC streams.
@@ -130,7 +132,7 @@ The executable test writes two Iceberg source tables directly through Iceberg
 APIs, then runs one unbounded Flink SQL `SELECT` over `iceberg-cdc`:
 
 ```bash
-./gradlew test --tests io.mat.it.SqlTemporalJoinCdcE2EIT --rerun-tasks
+./gradlew test --tests dev.henneberger.it.SqlTemporalJoinCdcE2EIT --rerun-tasks
 ```
 
 The example intentionally uses row payload event time:
@@ -167,6 +169,26 @@ metadata columns, and the temporal join example.
 
 Current test count: 32.
 
+## Artifacts and Releases
+
+The published Maven coordinate is:
+
+```kotlin
+implementation("dev.henneberger:iceberg-cdc:<version>")
+```
+
+Development builds use a local `0.1.0-SNAPSHOT` version. Release builds pass an
+explicit version with `-PreleaseVersion=<version>` and publish signed artifacts
+to Maven Central through `.github/workflows/release-central.yml`.
+
+The release workflow requires these repository or organization secrets:
+
+| Secret | Purpose |
+| --- | --- |
+| `MAVEN_CENTRAL_USERNAME` | Maven Central Portal token username |
+| `MAVEN_CENTRAL_TOKEN` | Maven Central Portal token password |
+| `MAVEN_GPG_PRIVATE_KEY` | ASCII-armored private key for artifact signing |
+| `MAVEN_GPG_PASSPHRASE` | Passphrase for the signing key |
 
 ## Architecture
 

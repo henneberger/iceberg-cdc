@@ -1,1 +1,1 @@
-io.mat.sql.IcebergCdcDynamicTableSourceFactory
+dev.henneberger.sql.IcebergCdcDynamicTableSourceFactory

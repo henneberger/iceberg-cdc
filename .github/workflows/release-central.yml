@@ -1,0 +1,89 @@
+name: Release to Maven Central
+
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version, for example 0.1.0
+        required: true
+        default: "0.1.0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-central-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Validate release inputs
+        env:
+          RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          : "${MAVEN_CENTRAL_USERNAME:?MAVEN_CENTRAL_USERNAME is required}"
+          : "${MAVEN_CENTRAL_TOKEN:?MAVEN_CENTRAL_TOKEN is required}"
+          : "${MAVEN_GPG_PRIVATE_KEY:?MAVEN_GPG_PRIVATE_KEY is required}"
+          : "${MAVEN_GPG_PASSPHRASE:?MAVEN_GPG_PASSPHRASE is required}"
+          release_version="${RELEASE_VERSION#v}"
+          case "$release_version" in
+            *-SNAPSHOT)
+              echo "Release version must not be a SNAPSHOT" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Verify public signing key
+        env:
+          MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        run: |
+          fingerprint="$(printf '%s' "$MAVEN_GPG_PRIVATE_KEY" | gpg --batch --import-options show-only --with-colons --import 2>/dev/null | awk -F: '/^fpr:/ { print $10; exit }')"
+          test -n "$fingerprint"
+          curl -fsS "https://keys.openpgp.org/vks/v1/by-fingerprint/$fingerprint" >/dev/null
+
+      - name: Publish to Maven Central
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
+        run: ./gradlew --no-daemon test publishAndReleaseToMavenCentral -PreleaseVersion="${RELEASE_VERSION#v}"
+
+      - name: Publish GitHub release notes
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes "Published dev.henneberger:iceberg-cdc:${GITHUB_REF_NAME#v} to Maven Central."
