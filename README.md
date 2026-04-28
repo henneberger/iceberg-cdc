@@ -1,5 +1,11 @@
 # iceberg-cdc
 
+[![Build](https://github.com/henneberger/iceberg-cdc/actions/workflows/build.yml/badge.svg)](https://github.com/henneberger/iceberg-cdc/actions/workflows/build.yml)
+![Java 17](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)
+![Apache Flink 2.0.0](https://img.shields.io/badge/Apache%20Flink-2.0.0-E6526F?logo=apacheflink&logoColor=white)
+![Apache Iceberg 1.10.1](https://img.shields.io/badge/Apache%20Iceberg-1.10.1-2E8BFF)
+![Gradle](https://img.shields.io/badge/build-Gradle-02303A?logo=gradle&logoColor=white)
+
 `iceberg-cdc` is an Apache Flink source connector that exposes Apache Iceberg tables as
 CDC streams.
 
