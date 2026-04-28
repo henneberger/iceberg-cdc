@@ -11,6 +11,24 @@
 `iceberg-cdc` is an Apache Flink source connector that exposes Apache Iceberg tables as
 CDC streams.
 
+## Dependency
+
+Gradle:
+
+```kotlin
+implementation("dev.henneberger:iceberg-cdc:0.1.0")
+```
+
+Maven:
+
+```xml
+<dependency>
+  <groupId>dev.henneberger</groupId>
+  <artifactId>iceberg-cdc</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
 The connector walks Iceberg snapshot history, plans row-level changes, and emits
 Flink changelog rows for inserts and deletes. It is intended for Flink SQL jobs
 that need to consume Iceberg tables as unbounded sources, including temporal
