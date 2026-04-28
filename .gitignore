@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+
+# JVM build artifacts
+*.class
+*.jar
+*.war
+*.ear
+out/
+target/
+
+# IDE/editor metadata
+.idea/
+.vscode/
+*.iml
+
+# OS and local environment files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Local test/runtime data
+warehouse/
+checkpoints/
+savepoints/
